@@ -1,0 +1,248 @@
+openapi: 3.0.3
+info:
+  title: Monday.com BI Agent
+  version: "1.0"
+  description: Business Intelligence agent for Monday.com work orders and deals data
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /:
+    get:
+      summary: Serve the chat UI
+      operationId: getIndex
+      tags:
+        - UI
+      responses:
+        "200":
+          description: HTML chat interface
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /health:
+    get:
+      summary: Health check and configuration status
+      operationId: getHealth
+      tags:
+        - System
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, monday_configured, groq_configured, memory_sessions]
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  monday_configured:
+                    type: boolean
+                    description: Monday.com API key and board IDs are configured
+                  groq_configured:
+                    type: boolean
+                    description: Groq API key is configured
+                  memory_sessions:
+                    type: integer
+                    description: Number of conversations in memory
+                    minimum: 0
+
+  /quality-report:
+    get:
+      summary: Retrieve the data quality report
+      operationId: getQualityReport
+      tags:
+        - Data
+      responses:
+        "200":
+          description: Quality report for cleaned data
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /memory:
+    get:
+      summary: View conversation memory for the current session
+      operationId: getMemory
+      tags:
+        - Memory
+      parameters:
+        - name: session_id
+          in: query
+          schema:
+            type: string
+          description: Session identifier (defaults to 'default' if not provided)
+      responses:
+        "200":
+          description: Session memory retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessions]
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      type: object
+                      required: [query, answer, timestamp]
+                      properties:
+                        query:
+                          type: string
+                        answer:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+
+    delete:
+      summary: Clear conversation memory for the current session
+      operationId: deleteMemory
+      tags:
+        - Memory
+      parameters:
+        - name: session_id
+          in: query
+          schema:
+            type: string
+          description: Session identifier (defaults to 'default' if not provided)
+      responses:
+        "200":
+          description: Memory cleared successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    example: cleared
+
+  /query:
+    post:
+      summary: Submit a business intelligence query
+      operationId: handleQuery
+      tags:
+        - Query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  minLength: 1
+                  description: The business question to answer
+                  example: What is our current deal pipeline value?
+                session_id:
+                  type: string
+                  description: Session identifier for isolating conversation memory
+                  example: session-001
+            examples:
+              DealPipeline:
+                summary: Pipeline value question
+                value:
+                  query: "What is our current deal pipeline value?"
+                  session_id: "session-001"
+              CompletedWorks:
+                summary: Historical analytics
+                value:
+                  query: "How many work orders were completed in Q2?"
+                  session_id: "session-002"
+      responses:
+        "200":
+          description: Query processed successfully and answer generated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [answer, trace, elapsed, wo_count, deals_count, source]
+                properties:
+                  answer:
+                    type: string
+                    description: The AI-generated business intelligence answer
+                  trace:
+                    type: array
+                    description: Detailed execution trace for debugging
+                    items:
+                      type: object
+                      additionalProperties: true
+                  elapsed:
+                    type: number
+                    description: Query execution time in seconds
+                    example: 2.35
+                  wo_count:
+                    type: integer
+                    description: Number of work orders fetched
+                    example: 150
+                  deals_count:
+                    type: integer
+                    description: Number of deals fetched
+                    example: 75
+                  source:
+                    type: string
+                    enum: [monday_live]
+                    description: Data source used for the query
+
+        "422":
+          description: Validation error (malformed request body, missing required fields)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+        "502":
+          description: Bad gateway - upstream service call to Monday.com or Groq failed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [answer, trace, error]
+                properties:
+                  answer:
+                    type: string
+                    description: Error message explaining what failed
+                    example: "❌ Failed to fetch Monday data: Connection timeout"
+                  trace:
+                    type: array
+                    description: Execution trace up to the failure point
+                    items:
+                      type: object
+                      additionalProperties: true
+                  error:
+                    type: boolean
+                    const: true
+
+        "503":
+          description: Service unavailable - Groq or Monday.com not configured
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [answer, trace, error]
+                properties:
+                  answer:
+                    type: string
+                    description: Configuration error message
+                    example: "⚠️ Groq API Key not set in environment variables"
+                  trace:
+                    type: array
+                    description: Request trace including configuration check details
+                    items:
+                      type: object
+                      additionalProperties: true
+                  error:
+                    type: boolean
+                    const: true

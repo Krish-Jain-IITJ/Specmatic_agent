@@ -1,0 +1,4 @@
+sources:
+  - provider: git
+    test:
+      - specmatic/openapi.yaml

@@ -20,16 +20,17 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 # Load environment variables
-GROQ_API_KEY      = os.getenv("GROQ_API_KEY", "")
-MONDAY_API_KEY    = os.getenv("MONDAY_API_KEY", "")
-MONDAY_BOARD_WO   = os.getenv("MONDAY_BOARD_WO", "")
-MONDAY_BOARD_DEALS = os.getenv("MONDAY_BOARD_DEALS", "")
+GROQ_API_KEY      = os.getenv("GROQ_API_KEY", "").strip()
+MONDAY_API_KEY    = os.getenv("MONDAY_API_KEY", "").strip()
+MONDAY_BOARD_WO   = os.getenv("MONDAY_BOARD_WO", "").strip()
+MONDAY_BOARD_DEALS = os.getenv("MONDAY_BOARD_DEALS", "").strip()
 MONDAY_API_URL    = "https://api.monday.com/v2"
 
 # Remove module-level client initialization - will initialize in handler
 groq_client = None
 
-conversation_memory = []
+# Per-session conversation memory: keys are session_id, values are lists of {query, answer, timestamp}
+conversation_memory: dict[str, list] = {}
 _BASE = Path(__file__).parent
 
 
@@ -112,11 +113,12 @@ async def get_live_data(trace: list) -> tuple[list, list, dict]:
 
 # ─── Claude ───────────────────────────────────────────────────────────────────
 
-def build_memory_ctx() -> str:
-    if not conversation_memory:
+def build_memory_ctx(session_id: str) -> str:
+    session_history = conversation_memory.get(session_id, [])
+    if not session_history:
         return ""
     lines = ["=== CONVERSATION MEMORY (last sessions) ==="]
-    for i, c in enumerate(conversation_memory[-5:], 1):
+    for i, c in enumerate(session_history[-5:], 1):
         lines.append(f"\n[Session {i}] Q: {c['query']}\nA: {c['answer'][:400]}…")
     return "\n".join(lines)
 
@@ -134,8 +136,8 @@ def format_quality_summary(qr: dict) -> str:
     return "\n".join(lines)
 
 
-def ask_llm(query: str, wo: list, deals: list, qr: dict, source: str, trace: list) -> str:
-    memory_ctx = build_memory_ctx()
+def ask_llm(query: str, wo: list, deals: list, qr: dict, source: str, trace: list, session_id: str) -> str:
+    memory_ctx = build_memory_ctx(session_id)
     quality_ctx = format_quality_summary(qr)
     source_note = "DATA SOURCE: Live Monday.com API (real-time fetch per query)"
 
@@ -212,7 +214,14 @@ async def handle_query(req: QueryRequest):
             "answer": "⚠️ GROQ_API_KEY not set in environment variables",
             "trace": trace,
             "error": True
-        })
+        }, status_code=503)
+
+    if " " in GROQ_API_KEY:
+        return JSONResponse({
+            "answer": "⚠️ GROQ_API_KEY contains invalid characters (spaces). Please check your configuration.",
+            "trace": trace,
+            "error": True
+        }, status_code=503)
 
     # Initialize Groq client if not already done
     global groq_client
@@ -226,14 +235,14 @@ async def handle_query(req: QueryRequest):
                 "answer": f"⚠️ Failed to initialize Groq client: {e}",
                 "trace": trace,
                 "error": True
-            })
+            }, status_code=503)
 
     if not (MONDAY_API_KEY and MONDAY_BOARD_WO and MONDAY_BOARD_DEALS):
         return JSONResponse({
             "answer": "⚠️ Monday.com not configured. Please set MONDAY_API_KEY and BOARD IDs.",
             "trace": trace,
             "error": True
-        })
+        }, status_code=503)
 
     # ✅ ALWAYS use live data (NO fallback)
     trace.append({"step": "data_source", "mode": "monday_live"})
@@ -250,11 +259,11 @@ async def handle_query(req: QueryRequest):
             "answer": f"❌ Failed to fetch Monday data: {e}",
             "trace": trace,
             "error": True
-        })
+        }, status_code=502)
 
     # ✅ Call Groq
     try:
-        answer = ask_llm(req.query, wo, deals, qr, source, trace)
+        answer = ask_llm(req.query, wo, deals, qr, source, trace, req.session_id)
     except Exception as e:
         trace.append({
             "step": "groq_error",
@@ -264,24 +273,24 @@ async def handle_query(req: QueryRequest):
             "answer": f"❌ Groq API error: {e}",
             "trace": trace,
             "error": True
-        })
+        }, status_code=502)
 
-    # ✅ Memory
-    conversation_memory.append({
+    # ✅ Memory (per-session)
+    conversation_memory.setdefault(req.session_id, []).append({
         "query": req.query,
         "answer": answer,
         "timestamp": datetime.now().isoformat()
     })
 
-    if len(conversation_memory) > 5:
-        conversation_memory.pop(0)
+    if len(conversation_memory[req.session_id]) > 5:
+        conversation_memory[req.session_id].pop(0)
 
     elapsed = round((datetime.now() - t0).total_seconds(), 2)
 
     trace.append({
         "step": "complete",
         "elapsed_seconds": elapsed,
-        "memory_size": len(conversation_memory)
+        "memory_size": len(conversation_memory.get(req.session_id, []))
     })
 
     return JSONResponse({
@@ -302,12 +311,12 @@ async def health():
     }
 
 @app.get("/memory")
-async def get_memory():
-    return {"sessions": conversation_memory}
+async def get_memory(session_id: str = "default"):
+    return {"sessions": conversation_memory.get(session_id, [])}
 
 @app.delete("/memory")
-async def clear_memory():
-    conversation_memory.clear()
+async def clear_memory(session_id: str = "default"):
+    conversation_memory[session_id] = []
     return {"status": "cleared"}
 
 @app.get("/quality-report")
