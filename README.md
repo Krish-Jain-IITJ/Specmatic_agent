@@ -20,14 +20,21 @@ FastAPI (Python) ──► Monday.com GraphQL API   (live board data)
 
 ## Setup
 
-### 1. Install dependencies
-```bash
-pip install -r requirements.txt
+### 1. Create and activate the virtual environment
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 ```
 
-### 2. Configure .env
-```bash
-cp .env.example .env
+### 2. Install dependencies
+```powershell
+python -m pip install -r requirements.txt
+```
+
+### 3. Configure .env
+```powershell
+copy .env.example .env
 # Edit .env with your actual keys
 ```
 
@@ -35,19 +42,71 @@ Required keys:
 - `MONDAY_API_KEY` — Monday.com API key (Admin > API)
 - `MONDAY_BOARD_WO` — Work Orders board ID (from board URL)
 - `MONDAY_BOARD_DEALS` — Deals board ID (from board URL)
+- `GROQ_API_KEY` — Groq API key for LLM access
 - `ANTHROPIC_API_KEY` — Anthropic API key
 
-### 3. Import data to Monday.com
+### 4. Import data to Monday.com
 - Import `Work_Order_Tracker_Data.xlsx` as a new board → "Work Orders"
 - Import `Deal_funnel_Data.xlsx` as a new board → "Deals"
 - Note the board IDs from the URLs and add to `.env`
 
-### 4. Run
-```bash
-uvicorn main:app --reload --port 8000
+### 5. Run
+```powershell
+python -m uvicorn main:app --reload --port 8000
 ```
 
 Open http://localhost:8000
+
+## Deploying on Vercel
+
+This project can be deployed on Vercel using a Python Serverless Function entrypoint.
+
+### 1. Add the Vercel config files
+- `api/index.py` should import the FastAPI app from `main.py`
+- `vercel.json` should route all requests to `/api/index.py`
+- `.vercelignore` should exclude `.venv`, `.git`, and `.env`
+
+### 2. Push your repo to GitHub
+Make sure the repository is published on GitHub and contains:
+- `main.py`
+- `requirements.txt`
+- `vercel.json`
+- `api/index.py`
+- `.vercelignore`
+
+### 3. Set environment variables in Vercel
+In your Vercel dashboard, go to Project Settings > Environment Variables and add:
+- `MONDAY_API_KEY`
+- `MONDAY_BOARD_WO`
+- `MONDAY_BOARD_DEALS`
+- `GROQ_API_KEY`
+- `ANTHROPIC_API_KEY`
+
+### 4. Deploy using Vercel CLI
+```powershell
+npm install -g vercel
+cd <your-project-folder>
+vercel login
+vercel
+```
+
+When prompted:
+- select or create your Vercel team
+- set project name
+- choose the root directory of this project
+- accept defaults for the Python function detection
+
+Then deploy production:
+```powershell
+vercel --prod
+```
+
+### 5. Verify the deployment
+Open the generated Vercel URL and test the root page.
+
+### Important notes
+- Vercel serverless functions have execution time limits, so if API calls are slow you may need a different host.
+- Do not store keys in `.env` for production; use Vercel environment variables instead.
 
 ## How Monday Board IDs work
 
