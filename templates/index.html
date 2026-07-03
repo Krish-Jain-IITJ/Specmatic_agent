@@ -4,28 +4,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SKYLARK DRONES</title>
+  <title>SPECMATIC IMPROVE</title>
   <link
-    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
     rel="stylesheet">
   <style>
     :root {
-      --bg: #F5F3EE;
+      --bg: #FFFFFF;
       --surface: #FFFFFF;
-      --surface2: #FAFAF7;
-      --monday: #FF3D57;
-      --monday2: #FF6B35;
+      --surface2: #F9F9F9;
       --accent: #0B4DFF;
       --accent2: #00C9A7;
-      --text: #111111;
-      --text2: #555555;
-      --text3: #999999;
-      --border: #E5E2D9;
-      --trace-bg: #0F0F0F;
-      --trace-text: #00FF9C;
-      --shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
-      --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
-      --radius: 16px;
+      --text: #202124;
+      --text2: #5F6368;
+      --text3: #9AA0A6;
+      --border: #DADCE0;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.16);
+      --radius: 12px;
       --radius-sm: 8px;
     }
 
@@ -36,14 +32,14 @@
     }
 
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Roboto', sans-serif;
       background: var(--bg);
       color: var(--text);
       height: 100vh;
       overflow: hidden;
       display: grid;
-      grid-template-columns: 280px 1fr 320px;
-      grid-template-rows: 64px 1fr;
+      grid-template-columns: 1fr;
+      grid-template-rows: 56px 1fr;
       gap: 0;
     }
 
@@ -67,37 +63,84 @@
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      padding: 0 24px;
+      padding: 0 20px;
       gap: 16px;
       position: sticky;
       top: 0;
       z-index: 100;
+      box-shadow: var(--shadow);
     }
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 18px;
-      letter-spacing: -0.5px;
+      gap: 12px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      font-size: 20px;
+      letter-spacing: 0;
+      color: var(--text);
     }
 
     .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--monday), var(--monday2));
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), #5B7FFF);
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 16px;
+      font-size: 18px;
+    }
+
+    .logo-icon img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
     }
 
     .status-pills {
+      display: none;
+    }
+
+    .pill {
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      background: #F0F0EA;
+      color: var(--text2);
       display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text3);
+    }
+
+    .pill.ok .dot {
+      background: var(--accent2);
+    }
+
+    .pill.warn .dot {
+      background: #FFA500;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
       gap: 8px;
       margin-left: auto;
     }
@@ -144,18 +187,18 @@
 
     /* ── Sidebar ── */
     aside {
+      display: none;
       background: var(--surface);
       border-right: 1px solid var(--border);
       padding: 20px;
       overflow-y: auto;
-      display: flex;
       flex-direction: column;
       gap: 20px;
     }
 
     .sidebar-title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 1.5px;
@@ -175,7 +218,7 @@
       padding: 12px 14px;
       text-align: left;
       cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Roboto', sans-serif;
       font-size: 13px;
       color: var(--text);
       line-height: 1.4;
@@ -250,7 +293,7 @@
     }
 
     .clear-memory:hover {
-      color: var(--monday);
+      color: var(--accent);
     }
 
     /* ── Chat area ── */
@@ -259,6 +302,9 @@
       flex-direction: column;
       overflow: hidden;
       background: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     #chat-messages {
@@ -267,7 +313,7 @@
       padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       scroll-behavior: smooth;
     }
 
@@ -285,27 +331,28 @@
     }
 
     .welcome-icon {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, var(--monday), var(--monday2));
-      border-radius: 24px;
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--accent), #5B7FFF);
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 36px;
-      box-shadow: 0 8px 32px rgba(255, 61, 87, 0.25);
+      font-size: 32px;
+      box-shadow: var(--shadow);
     }
 
     .welcome h2 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 28px;
-      letter-spacing: -1px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      font-size: 24px;
+      letter-spacing: 0;
+      color: var(--text);
     }
 
     .welcome p {
       color: var(--text2);
-      font-size: 15px;
+      font-size: 14px;
       max-width: 400px;
       line-height: 1.6;
     }
@@ -318,7 +365,7 @@
     }
 
     .tag {
-      background: white;
+      background: var(--surface2);
       border: 1px solid var(--border);
       padding: 6px 14px;
       border-radius: 100px;
@@ -337,7 +384,7 @@
     @keyframes fadeUp {
       from {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(8px);
       }
 
       to {
@@ -351,31 +398,32 @@
     }
 
     .msg-avatar {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 14px;
       flex-shrink: 0;
-      background: var(--border);
+      background: var(--surface2);
+      color: var(--text);
     }
 
     .msg.user .msg-avatar {
-      background: linear-gradient(135deg, var(--accent), #6366F1);
+      background: var(--accent);
       color: white;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 600;
     }
 
     .msg.bot .msg-avatar {
-      background: linear-gradient(135deg, var(--monday), var(--monday2));
-      color: white;
+      background: var(--surface2);
+      color: var(--text);
     }
 
     .msg-body {
-      max-width: calc(100% - 60px);
+      max-width: calc(100% - 50px);
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -386,26 +434,31 @@
     }
 
     .msg-bubble {
-      background: var(--surface);
+      background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px 18px;
+      padding: 12px 16px;
       font-size: 14px;
-      line-height: 1.65;
-      box-shadow: var(--shadow);
+      line-height: 1.5;
+      box-shadow: none;
     }
 
     .msg.user .msg-bubble {
-      background: linear-gradient(135deg, var(--accent), #6366F1);
+      background: var(--accent);
       color: white;
       border-color: transparent;
     }
 
     .msg-bubble h3 {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Roboto', sans-serif;
       font-size: 15px;
       margin-bottom: 8px;
       color: var(--text);
+      font-weight: 500;
+    }
+
+    .msg.user .msg-bubble h3 {
+      color: white;
     }
 
     .msg-bubble ul {
@@ -422,11 +475,15 @@
     }
 
     .msg-bubble code {
-      background: #F0EDE5;
+      background: #F0F0F0;
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 12px;
       font-family: 'Courier New', monospace;
+    }
+
+    .msg.user .msg-bubble code {
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .msg-meta {
@@ -447,7 +504,7 @@
     .badge-live {
       background: #FFF0F0;
       border: 1px solid #FECACA;
-      color: var(--monday);
+      color: #DC2626;
     }
 
     .badge-local {
@@ -473,7 +530,7 @@
     .dots span {
       width: 6px;
       height: 6px;
-      background: var(--monday);
+      background: var(--accent);
       border-radius: 50%;
       animation: bounce 1s infinite;
     }
@@ -491,13 +548,13 @@
       0%,
       80%,
       100% {
-        transform: scale(0.6);
         opacity: 0.5;
+        transform: scale(0.8);
       }
 
       40% {
-        transform: scale(1);
         opacity: 1;
+        transform: scale(1);
       }
     }
 
@@ -505,7 +562,7 @@
     .input-area {
       background: var(--surface);
       border-top: 1px solid var(--border);
-      padding: 16px 24px;
+      padding: 16px 20px;
       position: sticky;
       bottom: 0;
       z-index: 10;
@@ -516,28 +573,28 @@
       gap: 10px;
       align-items: flex-end;
       background: var(--surface2);
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 8px 8px 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 8px 16px;
       transition: border-color 0.2s;
     }
 
     .input-wrapper:focus-within {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(11, 77, 255, 0.08);
+      box-shadow: none;
     }
 
     #query-input {
       flex: 1;
       border: none;
       background: transparent;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Roboto', sans-serif;
       font-size: 14px;
       color: var(--text);
       outline: none;
       resize: none;
       min-height: 24px;
-      max-height: 120px;
+      max-height: 100px;
       line-height: 1.5;
     }
 
@@ -546,11 +603,11 @@
     }
 
     .send-btn {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, var(--monday), var(--monday2));
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
       border: none;
-      border-radius: 10px;
+      border-radius: 50%;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -562,7 +619,7 @@
 
     .send-btn:hover {
       transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(255, 61, 87, 0.35);
+      box-shadow: 0 4px 12px rgba(11, 77, 255, 0.3);
     }
 
     .send-btn:active {
@@ -572,7 +629,6 @@
     .send-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      transform: none;
     }
 
     .send-btn svg {
@@ -581,17 +637,17 @@
     }
 
     .input-hint {
-      margin-top: 8px;
       font-size: 11px;
       color: var(--text3);
+      margin-top: 8px;
       text-align: center;
     }
 
     /* ── Trace Panel ── */
     #trace-panel {
+      display: none;
       background: var(--surface);
       border-left: 1px solid var(--border);
-      display: flex;
       flex-direction: column;
       overflow: hidden;
     }
@@ -763,7 +819,7 @@
       <div class="logo-icon">
         <img src="/static/logo.png" alt="Logo">
       </div>
-      SkyLark Drones
+      SPECMATIC IMPROVE
     </div>
     <div class="status-pills">
       <div class="pill" id="pill-monday">
@@ -831,14 +887,14 @@
     <div id="chat-messages">
       <div class="welcome" id="welcome-screen">
         <div class="welcome-icon">📊</div>
-        <h2>Ask anything about your business</h2>
-        <p>I'll fetch <strong>live data</strong> from your Monday.com boards — Work Orders and Deals — and give you
-          founder-level insights instantly.</p>
+        <h2>Intelligent Business Analytics</h2>
+        <p>Get real-time insights from your business data. Ask questions naturally and receive instant, 
+          data-driven answers powered by contract-tested APIs.</p>
         <div class="welcome-tags">
-          <span class="tag"> Live API calls</span>
-          <span class="tag"> Context memory</span>
-          <span class="tag"> BI insights</span>
-          <span class="tag"> Tool trace</span>
+          <span class="tag">Real-time Data</span>
+          <span class="tag">AI Insights</span>
+          <span class="tag">Contract Tested</span>
+          <span class="tag">Full Transparency</span>
         </div>
       </div>
     </div>
@@ -846,7 +902,7 @@
     <div class="input-area">
       <div class="input-wrapper">
         <textarea id="query-input"
-          placeholder="Ask a business question... e.g. How's our pipeline for the energy sector?" rows="1"
+          placeholder="Ask a question... Get instant insights from your data" rows="1"
           onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
         <button class="send-btn" id="send-btn" onclick="submitQuery()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
