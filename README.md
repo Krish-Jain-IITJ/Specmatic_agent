@@ -21,6 +21,15 @@ FastAPI (Python) ──► Monday.com GraphQL API   (live board data)
 ## Setup
 
 ### 1. Create and activate the virtual environment
+
+**macOS / Linux:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+```
+
+**Windows (PowerShell):**
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -28,11 +37,21 @@ python -m pip install --upgrade pip
 ```
 
 ### 2. Install dependencies
-```powershell
+
+**macOS / Linux / Windows:**
+```bash
 python -m pip install -r requirements.txt
 ```
 
 ### 3. Configure .env
+
+**macOS / Linux:**
+```bash
+cp .env.example .env
+# Edit .env with your actual keys
+```
+
+**Windows (PowerShell):**
 ```powershell
 copy .env.example .env
 # Edit .env with your actual keys
@@ -51,7 +70,9 @@ Required keys:
 - Note the board IDs from the URLs and add to `.env`
 
 ### 5. Run
-```powershell
+
+**macOS / Linux / Windows:**
+```bash
 python -m uvicorn main:app --reload --port 8000
 ```
 
@@ -83,7 +104,9 @@ In your Vercel dashboard, go to Project Settings > Environment Variables and add
 - `ANTHROPIC_API_KEY`
 
 ### 4. Deploy using Vercel CLI
-```powershell
+
+**macOS / Linux / Windows:**
+```bash
 npm install -g vercel
 cd <your-project-folder>
 vercel login
@@ -97,7 +120,7 @@ When prompted:
 - accept defaults for the Python function detection
 
 Then deploy production:
-```powershell
+```bash
 vercel --prod
 ```
 
