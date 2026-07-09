@@ -1,0 +1,28 @@
+{
+  "http-request": {
+    "path": "/quality-report",
+    "method": "GET",
+    "headers": {
+      "Accept": "application/json"
+    }
+  },
+  "http-response": {
+    "status": 200,
+    "status-text": "OK",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "work_orders": {
+        "total_rows": 150,
+        "missing_status": 3,
+        "missing_assignee": 12
+      },
+      "deals": {
+        "total_rows": 75,
+        "missing_value": 5,
+        "missing_stage": 2
+      }
+    }
+  }
+}

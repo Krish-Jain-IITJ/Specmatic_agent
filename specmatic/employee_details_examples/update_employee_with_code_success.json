@@ -1,0 +1,30 @@
+{
+  "_readme": "External example — PATCH /employees with optional employeeCode field. Validates that the optional 'employeeCode' is accepted and echoed back in the response. This example lives outside the spec so it doesn't pollute the primary API definition — a common pattern when the spec is owned by another team.",
+  "http-request": {
+    "path": "/employees",
+    "method": "PATCH",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "name": "John Smith",
+      "department": "Operations",
+      "designation": "Senior Manager",
+      "employeeCode": "EMP-042"
+    }
+  },
+  "http-response": {
+    "status": 200,
+    "status-text": "OK",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "id": 42,
+      "name": "John Smith",
+      "department": "Operations",
+      "designation": "Senior Manager",
+      "employeeCode": "EMP-042"
+    }
+  }
+}

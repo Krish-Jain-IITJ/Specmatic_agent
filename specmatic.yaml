@@ -1,4 +1,101 @@
-sources:
-  - provider: git
-    test:
-      - specmatic/openapi.yaml
+version: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# specmatic.yaml — Root config for the Monday.com BI Agent
+#
+# Runs contract tests + schema resiliency tests against localhost:8000.
+#
+# Start the app first:
+#   Linux/macOS:  uvicorn main:app --reload --port 8000
+#   Windows:      python -m uvicorn main:app --reload --port 8000
+#
+# Then run Specmatic tests:
+#
+#   Java:
+#     java -jar specmatic.jar test --testBaseURL http://localhost:8000
+#
+#   npm:
+#     npx specmatic test --testBaseURL http://localhost:8000
+#
+#   Linux/macOS Docker:
+#     docker run --rm -p 9000:9000 \
+#       -v "$(pwd)":/specmatic \
+#       -w /specmatic \
+#       specmatic/specmatic test \
+#       --testBaseURL http://host.docker.internal:8000
+#
+#   Linux Docker (no host.docker.internal):
+#     HOST_IP=$(hostname -I | awk '{print $1}')
+#     docker run --rm \
+#       -v "$(pwd)":/specmatic \
+#       -w /specmatic \
+#       specmatic/specmatic test \
+#       --testBaseURL http://$HOST_IP:8000
+#
+#   Windows Docker (PowerShell):
+#     docker run --rm `
+#       -v "$(Get-Location):/specmatic" `
+#       -w /specmatic `
+#       specmatic/specmatic test `
+#       --testBaseURL http://host.docker.internal:8000
+#
+#   Windows Docker (CMD):
+#     docker run --rm ^
+#       -v "%cd%":/specmatic ^
+#       -w /specmatic ^
+#       specmatic/specmatic test ^
+#       --testBaseURL http://host.docker.internal:8000
+#
+# Mock mode (serve stubs on port 9000):
+#   java -jar specmatic.jar mock
+#   npx specmatic mock
+# ─────────────────────────────────────────────────────────────────────────────
+
+systemUnderTest:
+  service:
+    $ref: "#/components/services/mondayBiAgentService"
+  runOptions:
+    $ref: "#/components/runOptions/mondayBiAgentTest"
+
+dependencies:
+  services: []
+
+components:
+  sources:
+    localSpecs:
+      filesystem:
+        directory: specmatic
+
+  services:
+    mondayBiAgentService:
+      definitions:
+        # Primary API contract
+        - definition:
+            source:
+              $ref: "#/components/sources/localSpecs"
+            specs:
+              - openapi.yaml
+        # Schema resiliency test scenarios
+        - definition:
+            source:
+              $ref: "#/components/sources/localSpecs"
+            specs:
+              - resiliency_tests.yaml
+        # Employee service example spec — inline examples (employees.yaml)
+        - definition:
+            source:
+              $ref: "#/components/sources/localSpecs"
+            specs:
+              - employees.yaml
+        # Employee details spec — external examples in employee_details_examples/
+        - definition:
+            source:
+              $ref: "#/components/sources/localSpecs"
+            specs:
+              - employee_details.yaml
+
+  runOptions:
+    mondayBiAgentTest:
+      openapi:
+        type: test
+        baseUrl: http://localhost:8000

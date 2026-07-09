@@ -1,0 +1,28 @@
+{
+  "http-request": {
+    "path": "/memory",
+    "method": "GET",
+    "query": {
+      "session_id": "session-001"
+    },
+    "headers": {
+      "Accept": "application/json"
+    }
+  },
+  "http-response": {
+    "status": 200,
+    "status-text": "OK",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "sessions": [
+        {
+          "query": "What is our deal pipeline value?",
+          "answer": "The total open deal pipeline is $2.4M across 15 active deals.",
+          "timestamp": "2026-07-09T07:00:00Z"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "_comment": "RESILIENCY TEST: Extremely long query string (boundary value). The spec sets no maxLength on 'query'. This tests whether sending a 10,000-character query crashes the server (e.g. token limit error from the LLM blowing up as an unhandled exception → 500) vs. a graceful response. The server should either: (a) truncate and respond 200, or (b) respond with a meaningful error — but NEVER return 500 with an unhandled exception traceback.",
+  "http-request": {
+    "path": "/query",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "query": "What is our revenue forecast for the upcoming fiscal year given our current deal pipeline? Please provide a comprehensive analysis covering all sectors including energy, construction, agriculture, logistics, and infrastructure. Include year-over-year growth projections, top performing account managers, seasonal trends observed in Q1 through Q4, deal conversion rates, average deal size by sector, and any anomalies detected in the data. Also include recommendations for resource allocation and hiring based on workload distribution across all work order categories. Provide the full breakdown with confidence intervals and data quality caveats where applicable. This is a stress test to ensure the system handles large inputs without crashing. Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. Repeat: Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. Final repeat: Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "session_id": "session-resilience-005"
+    }
+  },
+  "http-response": {
+    "status": 200,
+    "status-text": "OK",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "answer": "Analysis complete. Revenue forecast and pipeline summary generated successfully.",
+      "trace": [
+        { "step": "fetch_monday_data", "elapsed_seconds": 0.85 },
+        { "step": "ask_llm", "elapsed_seconds": 3.20 },
+        { "step": "complete", "elapsed_seconds": 4.10, "memory_size": 0 }
+      ],
+      "elapsed": 4.10,
+      "wo_count": 150,
+      "deals_count": 75,
+      "source": "monday_live"
+    }
+  }
+}

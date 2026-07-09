@@ -22,6 +22,10 @@ paths:
             text/html:
               schema:
                 type: string
+              examples:
+                GET_INDEX_SUCCESS:
+                  summary: Returns the chat UI HTML page
+                  value: "<html><body>Monday BI Agent</body></html>"
 
   /health:
     get:
@@ -51,6 +55,24 @@ paths:
                     type: integer
                     description: Number of conversations in memory
                     minimum: 0
+              examples:
+                # ── Named inline example ──────────────────────────────
+                # Specmatic uses GET_HEALTH_SUCCESS as a contract test:
+                # it hits GET /health and expects this exact response shape.
+                GET_HEALTH_SUCCESS:
+                  summary: All integrations configured and healthy
+                  value:
+                    status: ok
+                    monday_configured: true
+                    groq_configured: true
+                    memory_sessions: 0
+                GET_HEALTH_PARTIAL:
+                  summary: App running but Groq not yet configured
+                  value:
+                    status: ok
+                    monday_configured: true
+                    groq_configured: false
+                    memory_sessions: 0
 
   /quality-report:
     get:
@@ -66,6 +88,18 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
+              examples:
+                GET_QUALITY_REPORT_SUCCESS:
+                  summary: Returns data quality metrics for Monday.com boards
+                  value:
+                    work_orders:
+                      total_rows: 150
+                      missing_status: 3
+                      missing_assignee: 12
+                    deals:
+                      total_rows: 75
+                      missing_value: 5
+                      missing_stage: 2
 
   /memory:
     get:
@@ -79,6 +113,10 @@ paths:
           schema:
             type: string
           description: Session identifier (defaults to 'default' if not provided)
+          examples:
+            GET_MEMORY_SESSION_001:
+              summary: Fetch memory for session-001
+              value: session-001
       responses:
         "200":
           description: Session memory retrieved
@@ -101,6 +139,21 @@ paths:
                         timestamp:
                           type: string
                           format: date-time
+              examples:
+                # ── Named inline example ──────────────────────────────
+                # Specmatic matches GET /memory?session_id=session-001
+                # and returns the GET_MEMORY_SESSION_001 response below.
+                GET_MEMORY_SESSION_001:
+                  summary: Memory for session-001 with one prior conversation
+                  value:
+                    sessions:
+                      - query: "What is our deal pipeline value?"
+                        answer: "The total open deal pipeline is $2.4M across 15 active deals."
+                        timestamp: "2026-07-09T07:00:00Z"
+                GET_MEMORY_EMPTY:
+                  summary: Empty memory for a brand-new session
+                  value:
+                    sessions: []
 
     delete:
       summary: Clear conversation memory for the current session
@@ -113,6 +166,10 @@ paths:
           schema:
             type: string
           description: Session identifier (defaults to 'default' if not provided)
+          examples:
+            DELETE_MEMORY_SESSION_001:
+              summary: Clear memory for session-001
+              value: session-001
       responses:
         "200":
           description: Memory cleared successfully
@@ -125,6 +182,11 @@ paths:
                   status:
                     type: string
                     example: cleared
+              examples:
+                DELETE_MEMORY_SESSION_001:
+                  summary: Memory for session-001 cleared
+                  value:
+                    status: cleared
 
   /query:
     post:
@@ -150,16 +212,35 @@ paths:
                   description: Session identifier for isolating conversation memory
                   example: session-001
             examples:
-              DealPipeline:
-                summary: Pipeline value question
+              # ── Named inline examples ─────────────────────────────
+              # Each name here MUST match the name under responses so
+              # Specmatic ties them into a single test scenario:
+              #
+              #   Request example name  →  Response example name
+              #   QUERY_PIPELINE_SUCCESS   →  QUERY_PIPELINE_SUCCESS  (200)
+              #   QUERY_UPSTREAM_ERROR     →  QUERY_UPSTREAM_ERROR    (502)
+              #   QUERY_CONFIG_ERROR       →  QUERY_CONFIG_ERROR      (503)
+              #
+              QUERY_PIPELINE_SUCCESS:
+                summary: Happy-path pipeline value question
                 value:
                   query: "What is our current deal pipeline value?"
                   session_id: "session-001"
-              CompletedWorks:
-                summary: Historical analytics
+              QUERY_WORKORDERS_SUCCESS:
+                summary: Happy-path historical analytics question
                 value:
                   query: "How many work orders were completed in Q2?"
                   session_id: "session-002"
+              QUERY_UPSTREAM_ERROR:
+                summary: Simulates a Monday.com upstream failure
+                value:
+                  query: "Show me top deals"
+                  session_id: "session-003"
+              QUERY_CONFIG_ERROR:
+                summary: Simulates missing Groq API key (service unavailable)
+                value:
+                  query: "What is our revenue forecast?"
+                  session_id: "session-004"
       responses:
         "200":
           description: Query processed successfully and answer generated
@@ -194,6 +275,39 @@ paths:
                     type: string
                     enum: [monday_live]
                     description: Data source used for the query
+              examples:
+                QUERY_PIPELINE_SUCCESS:
+                  summary: Successful pipeline analysis response
+                  value:
+                    answer: "The total open deal pipeline is $2.4M across 15 active deals. Top sector: Energy ($900K)."
+                    trace:
+                      - step: fetch_monday_data
+                        elapsed_seconds: 0.82
+                      - step: ask_llm
+                        elapsed_seconds: 1.45
+                      - step: complete
+                        elapsed_seconds: 2.31
+                        memory_size: 1
+                    elapsed: 2.31
+                    wo_count: 150
+                    deals_count: 75
+                    source: monday_live
+                QUERY_WORKORDERS_SUCCESS:
+                  summary: Successful Q2 work order analytics response
+                  value:
+                    answer: "42 work orders were completed in Q2 2026. Average completion time was 4.2 days."
+                    trace:
+                      - step: fetch_monday_data
+                        elapsed_seconds: 0.75
+                      - step: ask_llm
+                        elapsed_seconds: 1.30
+                      - step: complete
+                        elapsed_seconds: 2.10
+                        memory_size: 1
+                    elapsed: 2.10
+                    wo_count: 150
+                    deals_count: 75
+                    source: monday_live
 
         "422":
           description: Validation error (malformed request body, missing required fields)
@@ -202,6 +316,14 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
+              examples:
+                QUERY_VALIDATION_ERROR:
+                  summary: Empty query field rejected
+                  value:
+                    detail:
+                      - loc: ["body", "query"]
+                        msg: "field required"
+                        type: "value_error.missing"
 
         "502":
           description: Bad gateway - upstream service call to Monday.com or Groq failed
@@ -224,6 +346,18 @@ paths:
                   error:
                     type: boolean
                     const: true
+              examples:
+                # Name matches request example QUERY_UPSTREAM_ERROR →
+                # Specmatic returns this 502 when that request arrives.
+                QUERY_UPSTREAM_ERROR:
+                  summary: Monday.com API timed out
+                  value:
+                    answer: "❌ Failed to fetch Monday data: Connection timeout"
+                    trace:
+                      - step: fetch_monday_data
+                        elapsed_seconds: 10.0
+                        error: "Connection timeout after 10s"
+                    error: true
 
         "503":
           description: Service unavailable - Groq or Monday.com not configured
@@ -246,3 +380,15 @@ paths:
                   error:
                     type: boolean
                     const: true
+              examples:
+                # Name matches request example QUERY_CONFIG_ERROR →
+                # Specmatic returns this 503 when that request arrives.
+                QUERY_CONFIG_ERROR:
+                  summary: Groq API key missing from environment
+                  value:
+                    answer: "⚠️ Groq API Key not set in environment variables"
+                    trace:
+                      - step: config_check
+                        groq_configured: false
+                        monday_configured: true
+                    error: true

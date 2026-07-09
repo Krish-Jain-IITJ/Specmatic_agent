@@ -1,0 +1,30 @@
+{
+  "_comment": "RESILIENCY TEST: null value for required 'query' field. Schema marks query as required and type: string. Sending null should return 422 — NOT 500 (which would mean the null propagated into the LLM call). A common real-world bug: client sends null when they mean to omit, and server crashes trying to call .strip() or len() on None.",
+  "http-request": {
+    "path": "/query",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "query": null,
+      "session_id": "session-resilience-004"
+    }
+  },
+  "http-response": {
+    "status": 422,
+    "status-text": "Unprocessable Entity",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "detail": [
+        {
+          "loc": ["body", "query"],
+          "msg": "none is not an allowed value",
+          "type": "type_error.none.not_allowed"
+        }
+      ]
+    }
+  }
+}

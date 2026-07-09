@@ -1,0 +1,22 @@
+{
+  "http-request": {
+    "path": "/health",
+    "method": "GET",
+    "headers": {
+      "Accept": "application/json"
+    }
+  },
+  "http-response": {
+    "status": 200,
+    "status-text": "OK",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "status": "ok",
+      "monday_configured": true,
+      "groq_configured": true,
+      "memory_sessions": 0
+    }
+  }
+}

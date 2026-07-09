@@ -1,0 +1,24 @@
+{
+  "_readme": "External example — 400 Bad Request when required 'department' field is missing. Tests a different missing-field path. External examples allow multiple 400 scenarios to be added over time by QA teams without touching the spec.",
+  "http-request": {
+    "path": "/employees",
+    "method": "PATCH",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "name": "Alice Brown",
+      "designation": "Analyst"
+    }
+  },
+  "http-response": {
+    "status": 400,
+    "status-text": "Bad Request",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "message": "Required field 'department' is missing from request body"
+    }
+  }
+}

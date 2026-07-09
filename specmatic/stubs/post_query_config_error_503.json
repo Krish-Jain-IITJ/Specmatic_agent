@@ -1,0 +1,27 @@
+{
+  "http-request": {
+    "path": "/query",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "query": "What is our revenue forecast?",
+      "session_id": "session-004"
+    }
+  },
+  "http-response": {
+    "status": 503,
+    "status-text": "Service Unavailable",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "answer": "⚠️ Groq API Key not set in environment variables",
+      "trace": [
+        { "step": "config_check", "groq_configured": false, "monday_configured": true }
+      ],
+      "error": true
+    }
+  }
+}

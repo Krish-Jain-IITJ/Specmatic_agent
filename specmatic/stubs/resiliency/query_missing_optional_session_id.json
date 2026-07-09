@@ -1,0 +1,32 @@
+{
+  "_comment": "RESILIENCY TEST: Missing optional session_id field. The spec marks session_id as optional (not in 'required'). Server MUST default to a session (e.g. 'default') and return a valid 200 — not a 422 or 500. This tests that the optional field is truly treated as optional throughout the code path.",
+  "http-request": {
+    "path": "/query",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "query": "How many drones were serviced this month?"
+    }
+  },
+  "http-response": {
+    "status": 200,
+    "status-text": "OK",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "answer": "12 drones were serviced this month based on Work Orders board data.",
+      "trace": [
+        { "step": "fetch_monday_data", "elapsed_seconds": 0.90 },
+        { "step": "ask_llm", "elapsed_seconds": 1.60 },
+        { "step": "complete", "elapsed_seconds": 2.55, "memory_size": 0 }
+      ],
+      "elapsed": 2.55,
+      "wo_count": 150,
+      "deals_count": 75,
+      "source": "monday_live"
+    }
+  }
+}

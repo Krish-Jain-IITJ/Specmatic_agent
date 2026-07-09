@@ -1,0 +1,28 @@
+{
+  "_readme": "External example — PATCH /employees happy path. Specmatic picks up all JSON files in this directory automatically and uses them as contract test scenarios. No inline changes to the spec required.",
+  "http-request": {
+    "path": "/employees",
+    "method": "PATCH",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "name": "Jill Doe",
+      "department": "Engineering",
+      "designation": "Director"
+    }
+  },
+  "http-response": {
+    "status": 200,
+    "status-text": "OK",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "id": 10,
+      "name": "Jill Doe",
+      "department": "Engineering",
+      "designation": "Director"
+    }
+  }
+}

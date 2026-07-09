@@ -1,0 +1,30 @@
+{
+  "_comment": "RESILIENCY TEST: Empty string for required 'query' field. The spec sets minLength: 1 on 'query', so an empty string MUST be rejected with 422 Unprocessable Entity. This is a common schema violation — client sends '' instead of omitting the field. Verifies the validator is actually enforced, not bypassed.",
+  "http-request": {
+    "path": "/query",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "query": "",
+      "session_id": "session-resilience-002"
+    }
+  },
+  "http-response": {
+    "status": 422,
+    "status-text": "Unprocessable Entity",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "detail": [
+        {
+          "loc": ["body", "query"],
+          "msg": "ensure this value has at least 1 characters",
+          "type": "value_error.any_str.min_length"
+        }
+      ]
+    }
+  }
+}

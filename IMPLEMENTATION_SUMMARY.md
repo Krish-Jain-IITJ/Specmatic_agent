@@ -67,8 +67,10 @@ conversation_memory.setdefault(req.session_id, []).append({...})  # ← Per-sess
 - Specifies `session_id` parameter on `/memory` routes
 
 ### `specmatic.yaml`
-- Single-line Specmatic configuration
-- Points to `specmatic/openapi.yaml` as test source
+- Upgraded from **V1 → V3** format (service-wiring model)
+- Defines `components.sources`, `components.services`, and `components.runOptions`
+- Wires `systemUnderTest` to the local OpenAPI spec via `$ref`
+- `baseUrl` set to `http://localhost:8000` for test runs
 
 ---
 
@@ -244,31 +246,96 @@ Test Summary: 8 passed, 0 failed ✅
 
 ### 1. Review the Contract
 
+**Linux / macOS / Windows (Git Bash):**
 ```bash
 cat specmatic/openapi.yaml
+```
+
+**Windows (PowerShell / CMD):**
+```powershell
+Get-Content specmatic\openapi.yaml
+# or
+type specmatic\openapi.yaml
 ```
 
 Notice `/query` responses define status codes 200, 422, 502, 503.
 
 ### 2. Start the App
 
+**Linux / macOS:**
 ```bash
+# Activate virtual environment first
+source .venv/bin/activate
+
+uvicorn main:app --reload --port 8000
+```
+
+**Windows (PowerShell):**
+```powershell
+.\.venv\Scripts\Activate.ps1
 python -m uvicorn main:app --reload --port 8000
 ```
 
 ### 3. Run Specmatic
 
+**Linux / macOS:**
 ```bash
+# Option A — with host.docker.internal (Docker Desktop)
 docker run --rm \
   -v "$(pwd)":/specmatic \
   -w /specmatic \
   specmatic/specmatic test \
   --testBaseURL http://host.docker.internal:8000
+
+# Option B — Linux (host.docker.internal not available by default)
+HOST_IP=$(hostname -I | awk '{print $1}')
+docker run --rm \
+  -v "$(pwd)":/specmatic \
+  -w /specmatic \
+  specmatic/specmatic test \
+  --testBaseURL http://$HOST_IP:8000
+
+# Option C — use --network host (Linux only)
+docker run --rm \
+  -v "$(pwd)":/specmatic \
+  -w /specmatic \
+  --network host \
+  specmatic/specmatic test \
+  --testBaseURL http://localhost:8000
+```
+
+**Windows (PowerShell):**
+```powershell
+docker run --rm `
+  -v "$(Get-Location):/specmatic" `
+  -w /specmatic `
+  specmatic/specmatic test `
+  --testBaseURL http://host.docker.internal:8000
+```
+
+**Windows (CMD):**
+```cmd
+docker run --rm ^
+  -v "%cd%":/specmatic ^
+  -w /specmatic ^
+  specmatic/specmatic test ^
+  --testBaseURL http://host.docker.internal:8000
 ```
 
 ### 4. View Report
 
+**Linux:**
 ```bash
+xdg-open build/reports/specmatic/html/index.html
+```
+
+**macOS:**
+```bash
+open build/reports/specmatic/html/index.html
+```
+
+**Windows (PowerShell / CMD):**
+```powershell
 start build\reports\specmatic\html\index.html
 ```
 

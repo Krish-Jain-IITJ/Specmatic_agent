@@ -1,0 +1,28 @@
+{
+  "_readme": "External example — POST /query returns 502 Bad Gateway (Monday.com upstream timeout). External examples are the right place for error paths that aren't the primary spec concern. QA/ops teams can add new error scenarios here without touching the spec file.",
+  "http-request": {
+    "path": "/query",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "query": "Show top performing account managers",
+      "session_id": "session-ext-502"
+    }
+  },
+  "http-response": {
+    "status": 502,
+    "status-text": "Bad Gateway",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "answer": "❌ Failed to fetch Monday data: Connection timeout after 10s",
+      "trace": [
+        { "step": "fetch_monday_data", "elapsed_seconds": 10.0, "error": "Connection timeout" }
+      ],
+      "error": true
+    }
+  }
+}

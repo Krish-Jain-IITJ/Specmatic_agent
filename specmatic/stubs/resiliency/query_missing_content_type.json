@@ -1,0 +1,22 @@
+{
+  "_comment": "RESILIENCY TEST: Completely missing Content-Type header. HTTP clients sometimes forget to set Content-Type: application/json. FastAPI/Starlette should return 422 or 415 Unsupported Media Type — NOT a 500. Tests that the server's request parsing is defensive.",
+  "http-request": {
+    "path": "/query",
+    "method": "POST",
+    "headers": {},
+    "body": {
+      "query": "What is our revenue?",
+      "session_id": "session-resilience-006"
+    }
+  },
+  "http-response": {
+    "status": 422,
+    "status-text": "Unprocessable Entity",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "detail": "Content-Type must be application/json"
+    }
+  }
+}

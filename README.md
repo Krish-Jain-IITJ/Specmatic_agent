@@ -22,13 +22,6 @@ FastAPI (Python) ──► Monday.com GraphQL API   (live board data)
 
 ### 1. Create and activate the virtual environment
 
-**macOS / Linux:**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-```
-
 **Windows (PowerShell):**
 ```powershell
 python -m venv .venv
@@ -36,24 +29,36 @@ python -m venv .venv
 python -m pip install --upgrade pip
 ```
 
+**Linux / macOS (bash/zsh):**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+```
+
 ### 2. Install dependencies
 
-**macOS / Linux / Windows:**
-```bash
+**Windows (PowerShell):**
+```powershell
 python -m pip install -r requirements.txt
+```
+
+**Linux / macOS:**
+```bash
+pip install -r requirements.txt
 ```
 
 ### 3. Configure .env
 
-**macOS / Linux:**
-```bash
-cp .env.example .env
+**Windows (PowerShell / CMD):**
+```powershell
+copy .env.example .env
 # Edit .env with your actual keys
 ```
 
-**Windows (PowerShell):**
-```powershell
-copy .env.example .env
+**Linux / macOS:**
+```bash
+cp .env.example .env
 # Edit .env with your actual keys
 ```
 
@@ -71,9 +76,14 @@ Required keys:
 
 ### 5. Run
 
-**macOS / Linux / Windows:**
-```bash
+**Windows (PowerShell):**
+```powershell
 python -m uvicorn main:app --reload --port 8000
+```
+
+**Linux / macOS:**
+```bash
+uvicorn main:app --reload --port 8000
 ```
 
 Open http://localhost:8000
@@ -105,7 +115,15 @@ In your Vercel dashboard, go to Project Settings > Environment Variables and add
 
 ### 4. Deploy using Vercel CLI
 
-**macOS / Linux / Windows:**
+**Windows (PowerShell):**
+```powershell
+npm install -g vercel
+cd <your-project-folder>
+vercel login
+vercel
+```
+
+**Linux / macOS:**
 ```bash
 npm install -g vercel
 cd <your-project-folder>
@@ -120,6 +138,8 @@ When prompted:
 - accept defaults for the Python function detection
 
 Then deploy production:
+
+**Windows / Linux / macOS (same command):**
 ```bash
 vercel --prod
 ```

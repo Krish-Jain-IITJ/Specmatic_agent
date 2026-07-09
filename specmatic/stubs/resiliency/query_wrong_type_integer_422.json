@@ -1,0 +1,30 @@
+{
+  "_comment": "RESILIENCY TEST: Wrong type — integer instead of string for 'query' field. Schema declares query as type: string. Sending an integer (42) should trigger 422, not a silent type coercion or a 500 crash. Tests that FastAPI's Pydantic validation is strict about types.",
+  "http-request": {
+    "path": "/query",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "query": 42,
+      "session_id": "session-resilience-003"
+    }
+  },
+  "http-response": {
+    "status": 422,
+    "status-text": "Unprocessable Entity",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "detail": [
+        {
+          "loc": ["body", "query"],
+          "msg": "str type expected",
+          "type": "type_error.str"
+        }
+      ]
+    }
+  }
+}

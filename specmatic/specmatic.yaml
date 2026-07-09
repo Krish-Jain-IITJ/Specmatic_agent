@@ -1,0 +1,65 @@
+version: 3
+
+# ─────────────────────────────────────────────────────────────────────────────
+# specmatic/specmatic.yaml
+#
+# Config for the specmatic/ directory mock server.
+# Run from INSIDE the specmatic/ directory:
+#
+#   Java:
+#     java -jar specmatic.jar mock
+#
+#   npm:
+#     npx specmatic mock
+#
+#   Linux/macOS Docker:
+#     docker run --rm -p 9000:9000 \
+#       -v "$(pwd)":/specmatic \
+#       -w /specmatic \
+#       specmatic/specmatic mock
+#
+#   Windows Docker (PowerShell):
+#     docker run --rm -p 9000:9000 `
+#       -v "$(Get-Location):/specmatic" `
+#       -w /specmatic `
+#       specmatic/specmatic mock
+#
+#   Windows Docker (CMD):
+#     docker run --rm -p 9000:9000 ^
+#       -v "%cd%":/specmatic ^
+#       -w /specmatic ^
+#       specmatic/specmatic mock
+#
+# External examples convention:
+#   Specmatic automatically discovers external examples in
+#   {spec-name}_examples/ directories placed next to the spec file.
+#   No extra config needed — just drop JSON files in those folders.
+#
+#   employee_details_examples/  →  external examples for employee_details.yaml
+#   openapi_examples/           →  external examples for openapi.yaml
+#   employees_examples/         →  (future) external examples for employees.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+
+dependencies:
+  services:
+    - service:
+        description: Employee Service (inline examples)
+        definitions:
+          - definition:
+              source:
+                filesystem:
+                  directory: .
+              specs:
+                - spec:
+                    path: ./employees.yaml
+
+    - service:
+        description: Employee Details Service (external examples in employee_details_examples/)
+        definitions:
+          - definition:
+              source:
+                filesystem:
+                  directory: .
+              specs:
+                - spec:
+                    path: ./employee_details.yaml

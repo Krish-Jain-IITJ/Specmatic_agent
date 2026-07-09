@@ -1,0 +1,27 @@
+{
+  "http-request": {
+    "path": "/query",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "query": "Show me top deals",
+      "session_id": "session-003"
+    }
+  },
+  "http-response": {
+    "status": 502,
+    "status-text": "Bad Gateway",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "answer": "❌ Failed to fetch Monday data: Connection timeout",
+      "trace": [
+        { "step": "fetch_monday_data", "elapsed_seconds": 10.0, "error": "Connection timeout after 10s" }
+      ],
+      "error": true
+    }
+  }
+}
