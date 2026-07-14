@@ -33,4 +33,3 @@ components:
               $ref: "#/components/sources/localSpecs"
             specs:
               - openapi.yaml
-              - resiliency.yaml

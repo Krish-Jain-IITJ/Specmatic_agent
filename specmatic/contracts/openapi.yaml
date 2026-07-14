@@ -117,6 +117,13 @@ paths:
             GET_MEMORY_SESSION_001:
               summary: Fetch memory for session-001
               value: session-001
+            # ── Resiliency param examples ─────────────────────────────────
+            GET_MEMORY_NO_PARAM:
+              summary: No session_id — defaults to 'default'
+              value: ""
+            GET_MEMORY_NEVER_WRITTEN:
+              summary: session_id for a session that never sent a query
+              value: "session-brand-new"
       responses:
         "200":
           description: Session memory retrieved
@@ -152,6 +159,15 @@ paths:
                         timestamp: "2026-07-09T07:00:00Z"
                 GET_MEMORY_EMPTY:
                   summary: Empty memory for a brand-new session
+                  value:
+                    sessions: []
+                # ── Resiliency scenarios ──────────────────────────────────────
+                GET_MEMORY_NO_PARAM:
+                  summary: No session_id param — defaults to 'default', returns empty list
+                  value:
+                    sessions: []
+                GET_MEMORY_NEVER_WRITTEN:
+                  summary: session_id for a session that never sent a query — returns empty list
                   value:
                     sessions: []
 
@@ -201,10 +217,12 @@ paths:
             schema:
               type: object
               required: [query]
+              additionalProperties: true
               properties:
                 query:
                   type: string
                   minLength: 1
+                  maxLength: 10000
                   description: The business question to answer
                   example: What is our current deal pipeline value?
                 session_id:
@@ -241,6 +259,43 @@ paths:
                 value:
                   query: "What is our revenue forecast?"
                   session_id: "session-004"
+              # ── Resiliency scenarios ──────────────────────────────────────
+              QUERY_NO_SESSION_ID:
+                summary: Missing optional session_id — server must default to 'default'
+                value:
+                  query: "How many drones were serviced this month?"
+              QUERY_EXTRA_FIELDS:
+                summary: Unknown fields in request body — must be silently ignored
+                value:
+                  query: "What is our pipeline?"
+                  session_id: "session-extra"
+                  unknown_field: "should be ignored"
+                  injected_param: true
+              QUERY_INJECTION:
+                summary: SQL/script injection string — must be handled safely
+                value:
+                  query: "'; DROP TABLE sessions; -- What is our pipeline?"
+                  session_id: "session-injection"
+              QUERY_MAX_LENGTH:
+                summary: Near-maxLength query — server must not crash or return 500
+                value:
+                  query: "Provide a very comprehensive analysis of all revenue, pipeline, work orders, sector performance, hiring needs, and strategic outlook for Skylark Drones. Include all quarters, all sectors, all account managers, all deal stages. This is a boundary value test to confirm that even at maximum input size the system degrades gracefully without returning HTTP 500 or exposing an internal traceback to the client."
+                  session_id: "session-boundary"
+              QUERY_EMPTY_STRING:
+                summary: Empty string — rejected by minLength:1, must return 422
+                value:
+                  query: ""
+                  session_id: "session-empty"
+              QUERY_NULL_FIELD:
+                summary: Null for required non-nullable field — must return 422
+                value:
+                  query: null
+                  session_id: "session-null"
+              QUERY_WRONG_TYPE:
+                summary: Integer where string expected — must return 422
+                value:
+                  query: 12345
+                  session_id: "session-wrongtype"
       responses:
         "200":
           description: Query processed successfully and answer generated
@@ -308,6 +363,71 @@ paths:
                     wo_count: 150
                     deals_count: 75
                     source: monday_live
+                # ── Resiliency 200 responses ──────────────────────────────
+                QUERY_NO_SESSION_ID:
+                  summary: Successful response when session_id is omitted
+                  value:
+                    answer: "12 drones were serviced this month."
+                    trace:
+                      - step: fetch_monday_data
+                        elapsed_seconds: 0.90
+                      - step: ask_llm
+                        elapsed_seconds: 1.60
+                      - step: complete
+                        elapsed_seconds: 2.55
+                        memory_size: 0
+                    elapsed: 2.55
+                    wo_count: 150
+                    deals_count: 75
+                    source: monday_live
+                QUERY_EXTRA_FIELDS:
+                  summary: Server ignores unknown fields and answers normally
+                  value:
+                    answer: "The total open deal pipeline is $2.4M across 15 active deals."
+                    trace:
+                      - step: fetch_monday_data
+                        elapsed_seconds: 0.82
+                      - step: ask_llm
+                        elapsed_seconds: 1.45
+                      - step: complete
+                        elapsed_seconds: 2.31
+                        memory_size: 0
+                    elapsed: 2.31
+                    wo_count: 150
+                    deals_count: 75
+                    source: monday_live
+                QUERY_INJECTION:
+                  summary: Injection string treated as plain text, safe answer returned
+                  value:
+                    answer: "The pipeline data has been analyzed."
+                    trace:
+                      - step: fetch_monday_data
+                        elapsed_seconds: 0.82
+                      - step: ask_llm
+                        elapsed_seconds: 1.45
+                      - step: complete
+                        elapsed_seconds: 2.31
+                        memory_size: 0
+                    elapsed: 2.31
+                    wo_count: 150
+                    deals_count: 75
+                    source: monday_live
+                QUERY_MAX_LENGTH:
+                  summary: Very long query handled gracefully
+                  value:
+                    answer: "Comprehensive analysis complete."
+                    trace:
+                      - step: fetch_monday_data
+                        elapsed_seconds: 0.85
+                      - step: ask_llm
+                        elapsed_seconds: 3.20
+                      - step: complete
+                        elapsed_seconds: 4.10
+                        memory_size: 0
+                    elapsed: 4.10
+                    wo_count: 150
+                    deals_count: 75
+                    source: monday_live
 
         "422":
           description: Validation error (malformed request body, missing required fields)
@@ -315,7 +435,14 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                properties:
+                  detail:
+                    oneOf:
+                      - type: string
+                      - type: array
+                        items:
+                          type: object
+                          additionalProperties: true
               examples:
                 QUERY_VALIDATION_ERROR:
                   summary: Empty query field rejected
@@ -324,6 +451,27 @@ paths:
                       - loc: ["body", "query"]
                         msg: "field required"
                         type: "value_error.missing"
+                QUERY_EMPTY_STRING:
+                  summary: Empty string rejected by minLength:1
+                  value:
+                    detail:
+                      - loc: ["body", "query"]
+                        msg: "ensure this value has at least 1 characters"
+                        type: "value_error.any_str.min_length"
+                QUERY_NULL_FIELD:
+                  summary: Null for required non-nullable field
+                  value:
+                    detail:
+                      - loc: ["body", "query"]
+                        msg: "none is not an allowed value"
+                        type: "type_error.none.not_allowed"
+                QUERY_WRONG_TYPE:
+                  summary: Integer sent where string is required
+                  value:
+                    detail:
+                      - loc: ["body", "query"]
+                        msg: "str type expected"
+                        type: "type_error.str"
 
         "502":
           description: Bad gateway - upstream service call to Monday.com or Groq failed
