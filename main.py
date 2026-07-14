@@ -322,3 +322,17 @@ async def clear_memory(session_id: str = "default"):
 @app.get("/quality-report")
 async def quality_report():
     return LOCAL_QR
+
+@app.get("/actuator/health")
+async def actuator_health():
+    return {"status": "UP"}
+
+@app.get("/actuator/info")
+async def actuator_info():
+    return {
+        "app": {
+            "name": "Monday.com BI Agent",
+            "description": "BI Agent with Specmatic Contract Testing",
+            "version": "1.0.0"
+        }
+    }

@@ -392,3 +392,55 @@ paths:
                         groq_configured: false
                         monday_configured: true
                     error: true
+
+  /actuator/health:
+    get:
+      summary: Actuator health endpoint
+      operationId: actuatorHealth
+      tags:
+        - Actuator
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+              examples:
+                ACTUATOR_HEALTH_SUCCESS:
+                  value:
+                    status: "UP"
+
+  /actuator/info:
+    get:
+      summary: Actuator info endpoint
+      operationId: actuatorInfo
+      tags:
+        - Actuator
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  app:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      description:
+                        type: string
+                      version:
+                        type: string
+              examples:
+                ACTUATOR_INFO_SUCCESS:
+                  value:
+                    app:
+                      name: "Monday.com BI Agent"
+                      description: "BI Agent with Specmatic Contract Testing"
+                      version: "1.0.0"

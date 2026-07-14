@@ -1,0 +1,54 @@
+name: Specmatic Contract & Resiliency Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: monday_bi_agent
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Start FastAPI Application
+      env:
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        MONDAY_API_KEY: ${{ secrets.MONDAY_API_KEY }}
+        MONDAY_BOARD_WO: ${{ secrets.MONDAY_BOARD_WO }}
+        MONDAY_BOARD_DEALS: ${{ secrets.MONDAY_BOARD_DEALS }}
+      run: |
+        # Run the server in the background
+        python -m uvicorn main:app --port 8000 &
+        
+        # Wait for the server to be ready
+        echo "Waiting for server to start..."
+        sleep 5
+        curl --retry 5 --retry-delay 2 --retry-connrefused http://127.0.0.1:8000/actuator/health
+
+    - name: Run Specmatic Tests
+      env:
+        SPECMATIC_GENERATIVE_TESTS: "true"
+      run: |
+        docker run --network host --rm \
+          -e SPECMATIC_GENERATIVE_TESTS=$SPECMATIC_GENERATIVE_TESTS \
+          -v ${{ github.workspace }}/monday_bi_agent:/specmatic \
+          -w /specmatic \
+          specmatic/specmatic test --testBaseURL http://127.0.0.1:8000

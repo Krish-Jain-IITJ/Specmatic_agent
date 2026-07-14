@@ -79,7 +79,7 @@ docker run --rm `
 ### Success (After Fixes Applied)
 
 ```
-Loading contract from: specmatic/openapi.yaml
+Loading contract from: specmatic/contracts/openapi.yaml
 Tests generated: 15
 Tests passed: 15
 Tests failed: 0
@@ -215,7 +215,7 @@ Include these artifacts:
    - ✅ HTML report (success)
 
 2. **Code changes:**
-   - `specmatic/openapi.yaml` (the contract)
+   - `specmatic/contracts/openapi.yaml` (the contract)
    - `specmatic.yaml` (config)
    - Diffs in `main.py` (bugs fixed)
 

@@ -116,7 +116,7 @@ async def get_memory(session_id: str = "default"):
 
 ---
 
-## 3. OpenAPI Spec (`specmatic/openapi.yaml`)
+## 3. OpenAPI Spec (`specmatic/contracts/openapi.yaml`)
 
 The spec defines the "truth" about what the API should do — including correct status codes and examples:
 
@@ -241,7 +241,7 @@ async def test_sessions_are_isolated():
 ## 6. Files Changed
 
 ### Files Added
-- **`specmatic/openapi.yaml`** — The contract definition
+- **`specmatic/contracts/openapi.yaml`** — The contract definition
 - **`specmatic.yaml`** — Specmatic config pointing to the spec
 
 ### Files Modified
