@@ -10,9 +10,6 @@ jobs:
   contract-tests:
     runs-on: ubuntu-latest
     
-    defaults:
-      run:
-        working-directory: monday_bi_agent
 
     steps:
     - name: Checkout code
@@ -49,6 +46,6 @@ jobs:
       run: |
         docker run --network host --rm \
           -e SPECMATIC_GENERATIVE_TESTS=$SPECMATIC_GENERATIVE_TESTS \
-          -v ${{ github.workspace }}/monday_bi_agent:/specmatic \
+          -v ${{ github.workspace }}:/specmatic \
           -w /specmatic \
           specmatic/specmatic test --testBaseURL http://127.0.0.1:8000
