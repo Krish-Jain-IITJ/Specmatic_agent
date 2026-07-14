@@ -1,5 +1,4 @@
 {
-  "_readme": "External example — POST /query with no session_id (optional field omitted). The spec marks session_id as optional. This external example tests that the server defaults correctly to the 'default' session without throwing a KeyError or returning a 422. Impossible to express as an inline named example because the request and response names must match — here we just need the request to omit a field.",
   "http-request": {
     "path": "/query",
     "method": "POST",

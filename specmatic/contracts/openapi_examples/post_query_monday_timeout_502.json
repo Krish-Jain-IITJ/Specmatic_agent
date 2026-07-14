@@ -1,5 +1,4 @@
 {
-  "_readme": "External example — POST /query returns 502 Bad Gateway (Monday.com upstream timeout). External examples are the right place for error paths that aren't the primary spec concern. QA/ops teams can add new error scenarios here without touching the spec file.",
   "http-request": {
     "path": "/query",
     "method": "POST",

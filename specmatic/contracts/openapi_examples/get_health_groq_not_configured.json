@@ -1,5 +1,4 @@
 {
-  "_readme": "External example — GET /health when Groq is NOT configured. This scenario cannot be expressed easily as an inline example because the schema marks groq_configured as a boolean (both true and false are valid). External examples let you add environment-specific scenarios without touching the spec.",
   "http-request": {
     "path": "/health",
     "method": "GET",

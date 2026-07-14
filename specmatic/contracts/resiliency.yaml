@@ -33,6 +33,7 @@ paths:
             schema:
               type: object
               required: [query]
+              additionalProperties: true
               properties:
                 query:
                   type: string

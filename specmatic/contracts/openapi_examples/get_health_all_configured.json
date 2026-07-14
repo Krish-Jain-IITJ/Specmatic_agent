@@ -1,5 +1,4 @@
 {
-  "_readme": "External example for GET /health — full configuration present. Lives in openapi_examples/ so Specmatic picks it up automatically without any changes to openapi.yaml. Useful when the spec is shared/read-only or managed by a separate team.",
   "http-request": {
     "path": "/health",
     "method": "GET",

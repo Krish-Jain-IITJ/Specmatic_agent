@@ -1,5 +1,4 @@
 {
-  "_readme": "External example — POST /query happy path (pipeline analysis). External examples for /query avoid duplicating the large response body inline in the spec. Each file here is an independent scenario that Specmatic runs as a separate contract test.",
   "http-request": {
     "path": "/query",
     "method": "POST",

@@ -1,5 +1,4 @@
 {
-  "_readme": "External example — GET /memory for a session that has never sent a query. When session_id points to a brand-new key in conversation_memory, the server must return an empty list — not raise a KeyError. External examples surface this missing-key default-path bug without touching the inline spec.",
   "http-request": {
     "path": "/memory",
     "method": "GET",
